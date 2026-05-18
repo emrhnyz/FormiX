@@ -1,0 +1,31 @@
+# Dependencies & builds
+node_modules/
+.next/
+dist/
+out/
+build/
+
+# Contracts
+cache/
+artifacts/
+typechain-types/
+coverage/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+frontend/.env
+
+# Local app data
+data/
+
+# Promo video pipeline (not part of the app repo)
+video/
+
+# Misc
+*.tgz
+package/
+.DS_Store
+*.log
+Thumbs.db

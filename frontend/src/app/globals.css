@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --fx-border: rgba(139, 92, 246, 0.2);
+  --fx-glass: rgba(10, 12, 18, 0.72);
+}
+
+body {
+  @apply bg-ink-950 font-sans text-slate-100 antialiased;
+}
+
+@layer components {
+  .fx-glass {
+    @apply border border-white/[0.06] bg-ink-900/60 backdrop-blur-xl;
+  }
+
+  .fx-card {
+    @apply fx-glass animate-border-glow rounded-2xl transition duration-500;
+    @apply hover:-translate-y-1 hover:border-violet-500/40;
+    @apply hover:shadow-[0_0_48px_-12px_rgba(139,92,246,0.45)];
+  }
+
+  .fx-gradient-text {
+    @apply bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent;
+    background-size: 200% auto;
+    animation: shimmer 6s linear infinite;
+  }
+
+  .fx-btn-primary {
+    @apply relative overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600;
+    @apply bg-[length:200%_100%] px-6 py-3 font-semibold text-white;
+    @apply shadow-lg shadow-violet-900/40 transition duration-300;
+    @apply hover:bg-[position:100%_0] hover:shadow-[0_0_32px_rgba(139,92,246,0.5)];
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .fx-btn-primary::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent;
+    animation: btn-shine 2.5s ease-in-out infinite;
+  }
+
+  .fx-btn-secondary {
+    @apply rounded-xl border border-white/10 bg-white/[0.04] px-6 py-3 font-semibold text-slate-200;
+    @apply transition duration-300 hover:border-cyan-500/40 hover:bg-white/[0.08] hover:text-white;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .fx-section-title {
+    @apply font-display text-3xl font-bold tracking-tight text-white sm:text-4xl;
+  }
+
+  .fx-input {
+    @apply w-full rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-white;
+    @apply placeholder:text-slate-500 backdrop-blur-sm transition duration-300;
+    @apply focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/25;
+    @apply focus:shadow-[0_0_24px_rgba(34,211,238,0.12)];
+  }
+
+  .fx-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5;
+    @apply text-xs font-medium uppercase tracking-widest text-violet-200;
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  .fx-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .fx-table thead {
+    @apply bg-white/[0.04];
+  }
+
+  .fx-table th {
+    @apply border-b border-white/10 px-4 py-3 font-semibold text-slate-200;
+  }
+
+  .fx-table td {
+    @apply border-b border-white/[0.06] px-4 py-3 text-slate-400;
+  }
+
+  .fx-table tbody tr:hover td {
+    @apply bg-white/[0.02] text-slate-300;
+  }
+
+  .fx-banner-warn {
+    @apply rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-100/90;
+  }
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+.opacity-0-start {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-gradient-text,
+  .fx-btn-primary::after,
+  .fx-pill,
+  .fx-card {
+    animation: none !important;
+  }
+
+  .fx-card:hover {
+    transform: none;
+  }
+}
