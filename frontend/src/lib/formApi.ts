@@ -1,4 +1,5 @@
 import type { CreatorAuthHeaders } from "@/lib/creatorAuth";
+import { loadCachedSchema } from "@/lib/schemaShare";
 import type { FormSchema, StoredResponse } from "./schema";
 
 function authHeaders(auth: CreatorAuthHeaders): HeadersInit {
@@ -30,8 +31,8 @@ export async function saveFormSchema(
 
 export async function fetchFormSchema(address: string): Promise<FormSchema | null> {
   const res = await fetch(`/api/forms/${address}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  return res.json() as Promise<FormSchema>;
+  if (res.ok) return res.json() as Promise<FormSchema>;
+  return loadCachedSchema(address);
 }
 
 /** @deprecated Yanıtlar artık yalnızca zincirde (FHE). */

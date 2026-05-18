@@ -14,6 +14,7 @@ import {
   basescanTxUrl,
 } from "@/lib/extractFormAddress";
 import { saveFormSchema } from "@/lib/formApi";
+import { buildFillUrl, cacheSchemaLocally } from "@/lib/schemaShare";
 import { buildCreatorAccessMessage } from "@/lib/creatorAuth";
 import {
   getSlotCounts,
@@ -48,6 +49,8 @@ export default function CreatePage() {
   const [schema, setSchema] = useState<FormSchema>(defaultSchema);
   const [step, setStep] = useState<"build" | "done">("build");
   const [deployed, setDeployed] = useState<`0x${string}` | null>(null);
+  const [fillShareUrl, setFillShareUrl] = useState<string | null>(null);
+  const [schemaWarning, setSchemaWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<Hex | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,6 +59,8 @@ export default function CreatePage() {
 
   const deploy = async () => {
     setError(null);
+    setSchemaWarning(null);
+    setFillShareUrl(null);
     setLastTx(null);
     if (!isConnected || !address) {
       setError("Connect your wallet first.");
@@ -156,19 +161,27 @@ export default function CreatePage() {
       const signature = await signMessageAsync({
         message: buildCreatorAccessMessage(formAddr, ts),
       });
-      await saveFormSchema(
-        formAddr,
-        {
-          ...schema,
-          creator: address,
-          contractAddress: formAddr,
-        },
-        {
+      const payload: FormSchema = {
+        ...schema,
+        creator: address,
+        contractAddress: formAddr,
+      };
+      cacheSchemaLocally(formAddr, payload);
+      setFillShareUrl(buildFillUrl(formAddr, payload));
+
+      try {
+        await saveFormSchema(formAddr, payload, {
           address,
           signature: signature as Hex,
           timestamp: String(ts),
-        },
-      );
+        });
+      } catch (saveErr) {
+        const msg =
+          saveErr instanceof Error ? saveErr.message : "Could not save schema to server";
+        setSchemaWarning(
+          `${msg} Your form is on-chain. Use the Fill link below (schema embedded) so respondents can still answer.`,
+        );
+      }
 
       setDeployed(formAddr);
       setStep("done");
@@ -222,8 +235,21 @@ export default function CreatePage() {
             <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-8 text-center">
               <h2 className="font-display text-2xl font-bold text-emerald-300">Live on-chain</h2>
               <p className="mt-4 break-all font-mono text-sm text-white">{deployed}</p>
+              {schemaWarning && (
+                <p className="mx-auto mt-4 max-w-lg rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-left text-sm text-amber-100">
+                  {schemaWarning}
+                </p>
+              )}
+              {fillShareUrl && (
+                <p className="mx-auto mt-4 max-w-lg break-all text-left text-xs text-slate-400">
+                  Share link:{" "}
+                  <a href={fillShareUrl} className="text-cyan-300 underline">
+                    {fillShareUrl}
+                  </a>
+                </p>
+              )}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Link href={`/fill?form=${deployed}`} className="fx-btn-primary text-sm">
+                <Link href={fillShareUrl ?? `/fill?form=${deployed}`} className="fx-btn-primary text-sm">
                   Fill link
                 </Link>
                 <Link

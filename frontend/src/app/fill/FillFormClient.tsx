@@ -7,6 +7,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { DynamicFormFill } from "@/components/fill/DynamicFormFill";
 import { fetchFormSchema } from "@/lib/formApi";
 import { isTxHash, parseFormAddress } from "@/lib/parseAddress";
+import { decodeSchemaFromUrl } from "@/lib/schemaShare";
 import type { FormSchema } from "@/lib/schema";
 
 const FACTORY = process.env.NEXT_PUBLIC_FORM_FACTORY_ADDRESS?.toLowerCase();
@@ -14,6 +15,7 @@ const FACTORY = process.env.NEXT_PUBLIC_FORM_FACTORY_ADDRESS?.toLowerCase();
 export function FillFormClient() {
   const searchParams = useSearchParams();
   const initial = searchParams.get("form") ?? "";
+  const initialSchema = searchParams.get("schema");
 
   const [input, setInput] = useState(initial);
   const [address, setAddress] = useState<`0x${string}` | null>(null);
@@ -42,20 +44,31 @@ export function FillFormClient() {
 
     setLoading(true);
     setAddress(parsed);
+
+    const fromUrl = initialSchema ? decodeSchemaFromUrl(initialSchema) : null;
+    if (fromUrl) {
+      setSchema(fromUrl);
+      setLoading(false);
+      return;
+    }
+
     const data = await fetchFormSchema(parsed);
     setLoading(false);
     if (!data) {
       setError(
-        "Schema not found. For newly deployed forms, publish the schema from the Create flow.",
+        "Schema not found. Open the full Fill link from Create (includes embedded schema), or enable Vercel Blob storage.",
       );
       return;
     }
     setSchema(data);
-  }, []);
+  }, [initialSchema]);
 
   useEffect(() => {
     if (initial) void load(initial);
-  }, [initial, load]);
+    else if (initialSchema) {
+      setError("Add the form contract address in the URL (?form=0x…), or use the share link from Create.");
+    }
+  }, [initial, initialSchema, load]);
 
   return (
     <PageShell>
