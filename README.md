@@ -2,7 +2,7 @@
 
 **Private by design** — encrypted forms on-chain with [Fhenix CoFHE](https://cofhe-docs.fhenix.zone/).
 
-Built by **Emirhan** and **Eren** for Akindo Wave Hacks.
+Built by **Emirhan** for Akindo Wave Hacks.
 
 ## Supported networks (official CoFHE)
 
@@ -60,6 +60,19 @@ npm run dev
 ```
 
 Open http://localhost:3000 — connect wallet on **Base Sepolia**, fund with [Base Sepolia faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet) ETH.
+
+## Deploy on Vercel
+
+The Next.js app lives in **`frontend/`**. If Root Directory is wrong, Vercel shows `404: NOT_FOUND`.
+
+1. [Vercel](https://vercel.com) → your project → **Settings** → **General** → **Root Directory** → set to **`frontend`** → Save.
+2. **Settings** → **Environment Variables** (Production + Preview):
+   - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`
+   - `NEXT_PUBLIC_FORM_FACTORY_ADDRESS`
+   - `NEXT_PUBLIC_CHAIN` = `baseSepolia`
+3. **Deployments** → **Redeploy** the latest commit.
+
+Framework preset should be **Next.js**. Build command: `npm run build` (runs inside `frontend/`).
 
 ## Docs
 
