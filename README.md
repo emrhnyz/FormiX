@@ -70,9 +70,12 @@ The Next.js app lives in **`frontend/`**. If Root Directory is wrong, Vercel sho
    - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`
    - `NEXT_PUBLIC_FORM_FACTORY_ADDRESS`
    - `NEXT_PUBLIC_CHAIN` = `baseSepolia`
-3. **Deployments** → **Redeploy** the latest commit.
+3. **Storage** → **Blob** → Create store (links `BLOB_READ_WRITE_TOKEN` to the project). Required for saving form schemas after deploy.
+4. **Deployments** → **Redeploy** the latest commit.
 
 Framework preset should be **Next.js**. Build command: `npm run build` (runs inside `frontend/`).
+
+Without Blob, on-chain deploy succeeds but **“Could not save schema”** appears because serverless cannot write to `data/` on disk.
 
 ## Docs
 

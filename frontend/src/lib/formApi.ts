@@ -22,7 +22,10 @@ export async function saveFormSchema(
     },
     body: JSON.stringify({ ...schema, contractAddress: address }),
   });
-  if (!res.ok) throw new Error("Schema kaydedilemedi");
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? "Could not save schema");
+  }
 }
 
 export async function fetchFormSchema(address: string): Promise<FormSchema | null> {

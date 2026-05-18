@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { isAddress } from "viem";
 import { parseCreatorAuthHeaders, verifyCreatorAccess } from "@/lib/creatorAuth";
-import { ensureDataDirs, formPath, responsesPath } from "@/lib/storage";
-import type { FormSchema, StoredResponse } from "@/lib/schema";
-import { promises as fs } from "fs";
+import {
+  readFormSchemaJson,
+  schemaStorageReady,
+  writeFormSchemaJson,
+} from "@/lib/formStorage";
+import type { FormSchema } from "@/lib/schema";
 
 type RouteParams = { params: { address: string } };
 
@@ -13,13 +16,21 @@ export async function GET(_: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Invalid address" }, { status: 400 });
   }
 
+  const ready = schemaStorageReady();
+  if (!ready.ok) {
+    return NextResponse.json({ error: ready.error }, { status: 503 });
+  }
+
+  const raw = await readFormSchemaJson(address);
+  if (!raw) {
+    return NextResponse.json({ error: "Form not found" }, { status: 404 });
+  }
+
   try {
-    await ensureDataDirs();
-    const raw = await fs.readFile(formPath(address), "utf8");
     const schema = JSON.parse(raw) as FormSchema;
     return NextResponse.json(schema);
   } catch {
-    return NextResponse.json({ error: "Form not found" }, { status: 404 });
+    return NextResponse.json({ error: "Invalid stored schema" }, { status: 500 });
   }
 }
 
@@ -38,12 +49,21 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: verified.error }, { status: verified.status });
   }
 
+  const ready = schemaStorageReady();
+  if (!ready.ok) {
+    return NextResponse.json({ error: ready.error }, { status: 503 });
+  }
+
   const schema = (await request.json()) as FormSchema;
   schema.contractAddress = address;
 
-  await ensureDataDirs();
-  await fs.writeFile(formPath(address), JSON.stringify(schema, null, 2), "utf8");
-  return NextResponse.json({ ok: true });
+  try {
+    await writeFormSchemaJson(address, JSON.stringify(schema, null, 2));
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to save schema";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 /** Eski istemciler için kapalı — yanıtlar yalnızca zincirde (FHE). */
